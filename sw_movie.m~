@@ -1,0 +1,70 @@
+% make sw_video
+
+%% Making the video
+
+clear
+close
+
+the_globals
+the_parameters
+the_const_and_init
+
+% Build empty u, v, h, b matrices
+u_init = zeros(length(x), length(y));
+v_init = zeros(length(x), length(y));
+h_init = zeros(length(x), length(y)); 
+%b = zeros(length(x), length(y));
+
+% Initialize u, v
+u = u_init;
+v = v_init;
+% Initialize h: h_init_shape=0 (column), h_init_shape=1 (Gaussian) 
+h = h_start(h_init);
+%
+%check the look of the init h0
+%figure
+mesh(y, x, h) % mesh requires y first
+axis ([0 200000 0 100000 4970 5030])
+title ('Shallow Water Wave - SWW')
+xlabel('X Domain [m]')
+ylabel('Y Domain [m]')
+zlabel('Height [m]')
+
+
+% initialize bondary conditions
+[u_new, v_new, h_new] = bc_init(u, v, h);
+u = u_new;
+v = v_new; 
+h = h_new;
+
+% -----------------
+
+writerObj = VideoWriter('ShallowWater_2.avi');
+writerObj.FrameRate = 30;
+open(writerObj); 
+%
+for index=1:length(t)-1 %plotting loop
+    [u_new, v_new, h_new] = sww(u, v, h);
+    %either 
+    %mesh(x,y,h);
+    %or
+    ss = surf(y,x,h, 'FaceAlpha',0.5);  %surf is like mesh, (y,x,h)
+    set(ss,'LineStyle','none')
+    axis ([0 100000 0 100000 4970 5030])
+    title ('Shallow Water Wave - SWW')
+    xlabel('X Domain [m]')
+    ylabel('Y Domain [m]')
+    zlabel('Height [m]')
+    %pause(0.01)
+    %
+    frame = getframe(gcf); 
+    writeVideo(writerObj, frame);
+    %
+    % old=new and continue loop
+    u = u_new;
+    v = v_new;
+    h = h_new;
+end
+close(writerObj);
+    %
+
